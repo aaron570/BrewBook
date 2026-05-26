@@ -39,26 +39,18 @@ export default function SignupPage() {
       return
     }
 
-    // 2. Create organization
+    // 2. Create org + membership via server function (bypasses RLS)
     const slug = standName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
-    const { data: org, error: orgError } = await supabase
-      .from('organizations')
-      .insert({ name: standName, slug: `${slug}-${Date.now()}` })
-      .select()
-      .single()
+    const { error: rpcError } = await supabase.rpc('create_stand', {
+      stand_name: standName,
+      stand_slug: `${slug}-${Date.now()}`,
+    })
 
-    if (orgError || !org) {
+    if (rpcError) {
       setError('Could not create your coffee stand. Try again.')
       setLoading(false)
       return
     }
-
-    // 3. Add user as owner
-    await supabase.from('organization_members').insert({
-      org_id: org.id,
-      user_id: authData.user.id,
-      role: 'owner',
-    })
 
     router.push('/dashboard')
     router.refresh()
