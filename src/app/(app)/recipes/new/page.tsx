@@ -17,7 +17,7 @@ export default async function NewRecipePage() {
 
   const membership = membershipRaw as { org_id: string; role: string } | null
 
-  if (!membership || !['owner', 'manager'].includes(membership.role)) {
+  if (!membership || !['owner', 'manager'].includes(membership.role ?? '')) {
     redirect('/dashboard')
   }
 

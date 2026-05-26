@@ -33,10 +33,19 @@ export default async function DashboardPage({
   const membership = membershipRaw as { org_id: string; role: string } | null
   const canEdit = membership?.role === 'owner' || membership?.role === 'manager'
 
+  if (!membership) {
+    return (
+      <div className="text-center py-20 text-stone-500">
+        <p className="text-lg font-medium">No coffee stand found.</p>
+        <p className="text-sm mt-2">Your account was created but no stand is linked yet. Please contact support.</p>
+      </div>
+    )
+  }
+
   const { data: categoriesRaw } = await supabase
     .from('categories')
     .select('*')
-    .eq('org_id', membership!.org_id)
+    .eq('org_id', membership.org_id)
     .order('sort_order')
 
   const categories = (categoriesRaw ?? []) as Category[]
@@ -44,7 +53,7 @@ export default async function DashboardPage({
   let query = supabase
     .from('recipes')
     .select('*, categories(name, color)')
-    .eq('org_id', membership!.org_id)
+    .eq('org_id', membership.org_id)
     .order('sort_order')
     .order('created_at', { ascending: false })
 
